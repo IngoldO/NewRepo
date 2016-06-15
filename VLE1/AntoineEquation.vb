@@ -7,7 +7,7 @@
         Dim Log10P As Double
         Log10P = Acoef - Bcoef / (T + Ccoef)
         AntoineVaporPressure = 10 ^ Log10P * 10 ^ 5 'Vapor pressure [Pa]
-        'This is a change.
+        'This is a change. And another change.
     End Function
 
     Function AntoineBoilingPoint(P As Double, Acoef As Double, Bcoef As Double, Ccoef As Double) As Double
