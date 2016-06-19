@@ -2,6 +2,16 @@
 Public Class Form1
 
     Dim VaporPressure, Acoef, Bcoef, Ccoef, Temperature, Tmin, Tmax, Pmin, Pmax As Double
+    Structure AntoineInfo
+        Dim Name As String
+        Dim Acoef As Double
+        Dim Bcoef As Double
+        Dim Ccoef As Double
+        Dim Tmin As Double
+        Dim Tmax As Double
+    End Structure
+    Dim AntoineInfo1(1) As AntoineInfo
+
 
 
 
@@ -150,7 +160,8 @@ Public Class Form1
 
 
 
-    Private Sub ReadAntoineButton_Click(sender As Object, e As EventArgs) Handles ReadAntoineButton.Click
+    Private Sub ReadAntoineButton_Click(sender As Object, e As EventArgs) Handles MyBase.Load
+
         Using MyReader As New Microsoft.VisualBasic.
                        FileIO.TextFieldParser(
                          "AntoinePar.txt")
@@ -160,10 +171,20 @@ Public Class Form1
             RowNum = 0
             Dim currentRow As String()
             While Not MyReader.EndOfData
+
+
                 Try
                     currentRow = MyReader.ReadFields()
                     DataGridView1.Rows.Add(currentRow)
-                    '    DataGridView1.Rows(RowNum).Cells(FieldNum).Value = currentField
+                    AntoineInfo1(RowNum).Name = currentRow(0)
+                    AntoineInfo1(RowNum).Acoef = currentRow(1)
+                    AntoineInfo1(RowNum).Bcoef = currentRow(2)
+                    AntoineInfo1(RowNum).Ccoef = currentRow(3)
+                    AntoineInfo1(RowNum).Tmin = currentRow(4)
+                    AntoineInfo1(RowNum).Tmax = currentRow(5)
+
+                    RowNum = RowNum + 1
+                    ReDim Preserve AntoineInfo1(UBound(AntoineInfo1) + 1) 'Resize the structure
                 Catch ex As Microsoft.VisualBasic.
                             FileIO.MalformedLineException
                     MsgBox("Line " & ex.Message &
@@ -171,6 +192,40 @@ Public Class Form1
                 End Try
             End While
         End Using
+
+        Dim I, K As Integer
+        Dim Duplicate As Boolean
+        Dim CompoundNames(1) As String
+
+        'Adding Compound names as combobox items without duplicates
+        For I = 0 To AntoineInfo1.Length - 1
+            CompoundNames(I) = AntoineInfo1(I).Name
+            ReDim Preserve CompoundNames(CompoundNames.Length + 1)
+        Next
+
+        For I = 0 To CompoundNames.Length - 2
+            Duplicate = False
+            For K = I + 1 To CompoundNames.Length - 1
+                If CompoundNames(I) = CompoundNames(K) Then
+                    Duplicate = True
+                End If
+            Next
+            If Not Duplicate Then
+                CompoundComboBox.Items.Add(CompoundNames(I))
+            End If
+        Next
+
+        Duplicate = False
+        For I = 0 To CompoundNames.Length - 2
+            If CompoundNames(I) = CompoundNames(CompoundNames.Length - 1) Then
+                Duplicate = True
+            End If
+
+            If Not Duplicate Then
+                CompoundComboBox.Items.Add(CompoundNames(CompoundNames.Length - 1))
+            End If
+        Next
+
     End Sub
 
 
