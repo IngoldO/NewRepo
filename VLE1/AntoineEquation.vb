@@ -1,5 +1,14 @@
 ﻿Module AntoineEquation
 
+    Public Structure AntoineInfo
+        Dim Name As String
+        Dim Acoef As Double
+        Dim Bcoef As Double
+        Dim Ccoef As Double
+        Dim Tmin As Double
+        Dim Tmax As Double
+    End Structure
+
     Function AntoineVaporPressure(T As Double, Acoef As Double, Bcoef As Double, Ccoef As Double) As Double
         'In: Temperature [K], Antoine coefficients
         'Out: Vapor pressure [Pa]
@@ -57,6 +66,44 @@
         Next
 
         AntoineBoilingCurve = FunVal
+    End Function
+
+    'Function AntoineCoefSelect(Temperature As Double, Tmin() As Double, Tmax() As Double, Acoefs() As Double, Bcoefs() As Double, Ccoefs() As Double) As Double()
+    Function AntoineCoefSelect(Temperature As Double, AntoineData() As AntoineInfo, CompoundName As String) As Double()
+        'Function returning the best Antoine parameters based on temperature range
+
+        Dim K, Best As Integer 'Looping over the temperature vectors
+        Dim FunVal(3), SmallestTdiff As Double
+
+        For K = 0 To AntoineData.Length - 1
+
+            If AntoineData(K).Name = CompoundName Then
+
+                If AntoineData(K).Tmin < Temperature And AntoineData(K).Tmax > Temperature Then
+                    Best = K
+                    Exit For
+                End If
+
+                If AntoineData(K).Tmax < Temperature And Temperature - AntoineData(K).Tmax < SmallestTdiff Then
+                    SmallestTdiff = Temperature - AntoineData(K).Tmax
+                    Best = K
+                End If
+
+                If AntoineData(K).Tmax < Temperature And Temperature - AntoineData(K).Tmax < SmallestTdiff Then
+                    SmallestTdiff = Temperature - AntoineData(K).Tmax
+                    Best = K
+                End If
+
+            End If
+
+        Next
+
+
+        FunVal(0) = AntoineData(Best).Acoef
+        FunVal(1) = AntoineData(Best).Bcoef
+        FunVal(2) = AntoineData(Best).Ccoef
+
+        AntoineCoefSelect = FunVal
     End Function
 
 End Module

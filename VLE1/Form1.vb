@@ -2,14 +2,7 @@
 Public Class Form1
 
     Dim VaporPressure, Acoef, Bcoef, Ccoef, Temperature, Tmin, Tmax, Pmin, Pmax As Double
-    Structure AntoineInfo
-        Dim Name As String
-        Dim Acoef As Double
-        Dim Bcoef As Double
-        Dim Ccoef As Double
-        Dim Tmin As Double
-        Dim Tmax As Double
-    End Structure
+
     Dim AntoineInfo1(1) As AntoineInfo
 
 
@@ -50,7 +43,7 @@ Public Class Form1
             If AcoefBox.Text = "" Or BcoefBox.Text = "" Or CcoefBox.Text = "" Then
                 MsgBox("At least one Antoine coefficient is missing. Please provide all three coefficients.")
             ElseIf TemperatureBox.Text = "" Then
-                MsgBox("At least one Antoine coefficient is missing. Please provide all three coefficients.")
+                MsgBox("The temperature is missing. Please provide the temperature of your system.")
             Else
                 If TemperatureBox.Text <> Temperature Then
                     Temperature = TemperatureBox.Text
@@ -100,8 +93,8 @@ Public Class Form1
             Chart1.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Point
             Chart1.Series(0).Points.DataBindXY(TemperaturePlot, VaporPressurePlot)
 
-            Chart1.ChartAreas(0).AxisX.Title = ("Temperature / °C")
-            Chart1.ChartAreas(0).AxisY.Title = ("Heat capacity / [J/kg/K]")
+            Chart1.ChartAreas(0).AxisX.Title = ("Temperature [°C]")
+            Chart1.ChartAreas(0).AxisY.Title = ("Vapor pressure [bar]")
 
             Chart1.ChartAreas(0).AxisX.Interval = 10
             Chart1.ChartAreas(0).AxisX.Minimum = TminBox.Text
@@ -147,8 +140,8 @@ Public Class Form1
             Chart1.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Point
             Chart1.Series(0).Points.DataBindXY(PressurePlot, BoilingPointPlot)
 
-            Chart1.ChartAreas(0).AxisX.Title = ("Temperature / °C")
-            Chart1.ChartAreas(0).AxisY.Title = ("Heat capacity / [J/kg/K]")
+            Chart1.ChartAreas(0).AxisX.Title = ("Pressure [bar]")
+            Chart1.ChartAreas(0).AxisY.Title = ("Boiling point [°C]")
 
             Chart1.ChartAreas(0).AxisX.Interval = 0.2
             Chart1.ChartAreas(0).AxisX.Minimum = PminBox.Text
@@ -160,7 +153,7 @@ Public Class Form1
 
 
 
-    Private Sub ReadAntoineButton_Click(sender As Object, e As EventArgs) Handles MyBase.Load
+    Private Sub ReadAntoineData(sender As Object, e As EventArgs) Handles MyBase.Load
 
         Using MyReader As New Microsoft.VisualBasic.
                        FileIO.TextFieldParser(
@@ -220,13 +213,16 @@ Public Class Form1
             If CompoundNames(I) = CompoundNames(CompoundNames.Length - 1) Then
                 Duplicate = True
             End If
-
-            If Not Duplicate Then
-                CompoundComboBox.Items.Add(CompoundNames(CompoundNames.Length - 1))
-            End If
         Next
+        If Not Duplicate Then
+            CompoundComboBox.Items.Add(CompoundNames(CompoundNames.Length - 1))
+        End If
 
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        CompoundComboBox.SelectedIndex = 0 'Default selection upon loading the form
     End Sub
+
+
 
 
 
