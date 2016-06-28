@@ -11,11 +11,12 @@ Public Class Form1
     Dim Form1IsInitialized As Boolean
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Form1IsInitialized = False
 
         'Filling in default values
-        AcoefBox.Text = 4.42448
-        BcoefBox.Text = 1312.253
-        CcoefBox.Text = -32.445
+        ' AcoefBox.Text = 4.42448
+        ' BcoefBox.Text = 1312.253
+        ' CcoefBox.Text = -32.445
         TemperatureBox.Text = 25 '[°C]
         TminBox.Text = 10 '[°C]
         TmaxBox.Text = 70 '[°C]
@@ -24,17 +25,111 @@ Public Class Form1
 
 
 
+
+
+        Using MyReader As New Microsoft.VisualBasic.
+                    FileIO.TextFieldParser(
+                      "AntoinePar.txt")
+            MyReader.TextFieldType = FileIO.FieldType.Delimited
+            MyReader.SetDelimiters(",")
+            Dim RowNum As Integer
+            RowNum = 0
+            Dim currentRow As String()
+            While Not MyReader.EndOfData
+
+
+                Try
+                    currentRow = MyReader.ReadFields()
+                    DataGridView1.Rows.Add(currentRow)
+                    AntoineInfo1(RowNum).Name = currentRow(0)
+                    AntoineInfo1(RowNum).Acoef = currentRow(1)
+                    AntoineInfo1(RowNum).Bcoef = currentRow(2)
+                    AntoineInfo1(RowNum).Ccoef = currentRow(3)
+                    AntoineInfo1(RowNum).Tmin = currentRow(4)
+                    AntoineInfo1(RowNum).Tmax = currentRow(5)
+
+                    RowNum = RowNum + 1
+                    ReDim Preserve AntoineInfo1(UBound(AntoineInfo1) + 1) 'Resize the structure
+                Catch ex As Microsoft.VisualBasic.
+                            FileIO.MalformedLineException
+                    MsgBox("Line " & ex.Message &
+                    "is not valid and will be skipped.")
+                End Try
+            End While
+        End Using
+
+        Dim I, K As Integer
+        Dim Duplicate As Boolean
+        Dim CompoundNames(1) As String
+
+        'Adding Compound names as combobox items without duplicates
+        For I = 0 To AntoineInfo1.Length - 1
+            CompoundNames(I) = AntoineInfo1(I).Name
+            ReDim Preserve CompoundNames(CompoundNames.Length + 1)
+        Next
+
+        For I = 0 To CompoundNames.Length - 2
+            Duplicate = False
+            For K = I + 1 To CompoundNames.Length - 1
+                If CompoundNames(I) = CompoundNames(K) Then
+                    Duplicate = True
+                End If
+            Next
+            If Not Duplicate Then
+                CompoundComboBox.Items.Add(CompoundNames(I))
+            End If
+        Next
+
+        Duplicate = False
+        For I = 0 To CompoundNames.Length - 2
+            If CompoundNames(I) = CompoundNames(CompoundNames.Length - 1) Then
+                Duplicate = True
+            End If
+        Next
+        If Not Duplicate Then
+            CompoundComboBox.Items.Add(CompoundNames(CompoundNames.Length - 1))
+        End If
+
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        CompoundComboBox.SelectedIndex = 1 'Default selection upon loading the form
+
+
+
+        Dim resul(2) As Double
+        Temperature = TemperatureBox.Text + 273.15
+
+        resul = AntoineCoefSelect(Temperature, AntoineInfo1, CompoundComboBox.Text)
+
+        AcoefBox.Text = resul(0)
+        BcoefBox.Text = resul(1)
+        CcoefBox.Text = resul(2)
+
+
+
         Acoef = AcoefBox.Text
         Bcoef = BcoefBox.Text
         Ccoef = CcoefBox.Text
 
-        Temperature = TemperatureBox.Text + 273.15
         VaporPressure = AntoineVaporPressure(Temperature, Acoef, Bcoef, Ccoef) 'function returns vapor pressure [Pa]
 
         PressureBox.Text = VaporPressure / 10 ^ 5 '[bar]
         Form1IsInitialized = True
 
+
     End Sub
+
+
+    Private Sub CompoundComboBoxChange() Handles CompoundComboBox.TextChanged
+        Dim resul() As Double
+
+        resul = AntoineCoefSelect(TemperatureBox.Text + 273.15, AntoineInfo1, CompoundComboBox.Text)
+
+        AcoefBox.Text = resul(0)
+        BcoefBox.Text = resul(1)
+        CcoefBox.Text = resul(2)
+    End Sub
+
+
 
     Private Sub InputChange() Handles TemperatureBox.TextChanged, AcoefBox.TextChanged, BcoefBox.TextChanged, CcoefBox.TextChanged
 
@@ -101,6 +196,10 @@ Public Class Form1
 
         End If
 
+
+
+
+
     End Sub
 
 
@@ -152,75 +251,6 @@ Public Class Form1
 
 
 
-
-    Private Sub ReadAntoineData(sender As Object, e As EventArgs) Handles MyBase.Load
-
-        Using MyReader As New Microsoft.VisualBasic.
-                       FileIO.TextFieldParser(
-                         "AntoinePar.txt")
-            MyReader.TextFieldType = FileIO.FieldType.Delimited
-            MyReader.SetDelimiters(",")
-            Dim RowNum As Integer
-            RowNum = 0
-            Dim currentRow As String()
-            While Not MyReader.EndOfData
-
-
-                Try
-                    currentRow = MyReader.ReadFields()
-                    DataGridView1.Rows.Add(currentRow)
-                    AntoineInfo1(RowNum).Name = currentRow(0)
-                    AntoineInfo1(RowNum).Acoef = currentRow(1)
-                    AntoineInfo1(RowNum).Bcoef = currentRow(2)
-                    AntoineInfo1(RowNum).Ccoef = currentRow(3)
-                    AntoineInfo1(RowNum).Tmin = currentRow(4)
-                    AntoineInfo1(RowNum).Tmax = currentRow(5)
-
-                    RowNum = RowNum + 1
-                    ReDim Preserve AntoineInfo1(UBound(AntoineInfo1) + 1) 'Resize the structure
-                Catch ex As Microsoft.VisualBasic.
-                            FileIO.MalformedLineException
-                    MsgBox("Line " & ex.Message &
-                    "is not valid and will be skipped.")
-                End Try
-            End While
-        End Using
-
-        Dim I, K As Integer
-        Dim Duplicate As Boolean
-        Dim CompoundNames(1) As String
-
-        'Adding Compound names as combobox items without duplicates
-        For I = 0 To AntoineInfo1.Length - 1
-            CompoundNames(I) = AntoineInfo1(I).Name
-            ReDim Preserve CompoundNames(CompoundNames.Length + 1)
-        Next
-
-        For I = 0 To CompoundNames.Length - 2
-            Duplicate = False
-            For K = I + 1 To CompoundNames.Length - 1
-                If CompoundNames(I) = CompoundNames(K) Then
-                    Duplicate = True
-                End If
-            Next
-            If Not Duplicate Then
-                CompoundComboBox.Items.Add(CompoundNames(I))
-            End If
-        Next
-
-        Duplicate = False
-        For I = 0 To CompoundNames.Length - 2
-            If CompoundNames(I) = CompoundNames(CompoundNames.Length - 1) Then
-                Duplicate = True
-            End If
-        Next
-        If Not Duplicate Then
-            CompoundComboBox.Items.Add(CompoundNames(CompoundNames.Length - 1))
-        End If
-
-        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        CompoundComboBox.SelectedIndex = 0 'Default selection upon loading the form
-    End Sub
 
 
 

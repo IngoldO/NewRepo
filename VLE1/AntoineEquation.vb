@@ -74,10 +74,13 @@
 
         Dim K, Best As Integer 'Looping over the temperature vectors
         Dim FunVal(3), SmallestTdiff As Double
-
+        SmallestTdiff = 1000 'Huge initial value
+        Best = AntoineData.Length 'If no match is found, no Antoine coefficients will be selected.
         For K = 0 To AntoineData.Length - 1
-
+            System.Diagnostics.Debug.Print(AntoineData(K).Name)
+            ' System.Diagnostics.Debug.Print(CompoundName)
             If AntoineData(K).Name = CompoundName Then
+
 
                 If AntoineData(K).Tmin < Temperature And AntoineData(K).Tmax > Temperature Then
                     Best = K
@@ -89,8 +92,8 @@
                     Best = K
                 End If
 
-                If AntoineData(K).Tmax < Temperature And Temperature - AntoineData(K).Tmax < SmallestTdiff Then
-                    SmallestTdiff = Temperature - AntoineData(K).Tmax
+                If AntoineData(K).Tmin > Temperature And AntoineData(K).Tmin - Temperature < SmallestTdiff Then
+                    SmallestTdiff = AntoineData(K).Tmin - Temperature
                     Best = K
                 End If
 
